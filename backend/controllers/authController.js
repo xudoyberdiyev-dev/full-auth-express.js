@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';  // 🔹 Parolni hash qilish va tekshirish uchun 'bcryptjs' moduli chaqirilmoqda
 import jwt from 'jsonwebtoken';  // 🔹 Foydalanuvchini autentifikatsiya qilish uchun JWT token yaratish va tekshirish uchun modul
 import userModel from '../model/userModel.js';  // 🔹 Mongoose orqali foydalanuvchi modeli chaqirilmoqda
+import transporter from '../config/nodemailer.js';
 
 // ========================== Foydalanuvchini ro‘yxatdan o‘tkazish ==========================
 export const register = async (req, res) => {  // 🔹 "register" funksiyasi e'lon qilinmoqda (async - asinxron)
@@ -33,6 +34,15 @@ export const register = async (req, res) => {  // 🔹 "register" funksiyasi e'l
             sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',  
             maxAge: 7 * 24 * 60 * 60 * 1000  // 🔹 Cookie 7 kun davomida saqlanadi
         });
+
+        const mailOptions={
+            from:process.env.SENDER_EMAIL,
+            to:email,
+            subject:"Hush kelibsiz oka",
+            text:`Hush kelibsiz bizning web sitemizga salom berdik akahon id:${email}`
+        }
+
+        await transporter.sendMail(mailOptions)
 
         res.json({ success: true, message: "Ro‘yxatdan o‘tish muvaffaqiyatli" });  // 🔹 Javob qaytarish
 
@@ -96,3 +106,39 @@ export const logout = async (req, res) => {
         res.status(500).json({ success: false, message: "Logoutda xatolik" });   
     }
 };
+
+
+export const sendVerifyOtp=async(req,res)=>{
+    try{
+
+        const {userId} =req.body;
+
+        const user =await userModel.findById(userId)
+
+        if(user.isAccountVerified){
+            return res.json({success:false,message:"Account alradiy nmadurla"})
+        }
+
+        const opt =String(Math.floor(100000+Math.random()*900000))
+
+        user.verifyOtp=opt;
+        user.verifyOtpExpireAt=Date.now()+24*60*60*1000
+
+        await user.save()
+
+        const mailOptions={
+            from:process.env.SENDER_EMAIL,
+            to:user.email,
+            subject:"Hush kelibsiz oka",
+            text:`Hush kelibsiz bizning web sitemizga salom berdik akahon id:${opt}`
+        }
+
+        await transporter.sendMail(mailOptions)
+
+        res.json({success:true,message:"Verifiy OPT sen email oka"})
+
+
+    }catch(error){
+        res.json({success:false,message:error.message})
+    }
+}
