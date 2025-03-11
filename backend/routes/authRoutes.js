@@ -1,11 +1,16 @@
-import express from 'express'
-import { login, logout, register } from '../controllers/authController.js';
+import express from 'express';  // 🔹 Express.js kutubxonasini import qilish (API yo‘llarini yaratish uchun)
+import { login, logout, register } from '../controllers/authController.js';  
+// 🔹 Foydalanuvchini ro‘yxatdan o‘tkazish, login qilish va logout qilish funksiyalarini import qilish
 
+const authRoutes = express.Router();  // 🔹 Express Router obyektini yaratish (marshrutlarni boshqarish uchun)
 
-const authRoutes=express.Router();
+// 🔹 Ro‘yxatdan o‘tish uchun POST so‘rovi
+authRoutes.post('/register', register);
 
-authRoutes.post('/register',register)
-authRoutes.post("/login",login)
-authRoutes.post('/logout',logout)
+// 🔹 Hisobga kirish uchun POST so‘rovi
+authRoutes.post("/login", login);
 
-export default authRoutes
+// 🔹 Hisobdan chiqish uchun POST so‘rovi
+authRoutes.post('/logout', logout);
+
+export default authRoutes;  // 🔹 Routerni eksport qilish (boshqa joyda ishlatish uchun)
