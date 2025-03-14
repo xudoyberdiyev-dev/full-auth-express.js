@@ -11,6 +11,7 @@ dotenv.config();
 
 // 🔹 MongoDB bazasiga ulanish
 connectDB();
+const allowedOrigins=['http://localhost:5173']
 
 const app = express();  // 🔹 Express ilovasini yaratish
 const port = process.env.PORT || 4000;  // 🔹 Portni .env fayldan olish yoki standart 4000 portni ishlatish
@@ -18,7 +19,7 @@ const port = process.env.PORT || 4000;  // 🔹 Portni .env fayldan olish yoki s
 // 🔹 Middleware'lar (ma’lumotlarni qayta ishlash vositalari)
 app.use(express.json());  // 🔹 JSON formatdagi ma’lumotlarni qabul qilish uchun
 app.use(cookieParser());  // 🔹 Cookie'larni o‘qish va ishlatish uchun
-app.use(cors({ credentials: true }));  // 🔹 CORS (frontend va backend ulanishi uchun)
+app.use(cors({origin:allowedOrigins, credentials: true }));  // 🔹 CORS (frontend va backend ulanishi uchun)
 
 // 🔹 Serverning asosiy endpointi (test qilish uchun)
 app.get('/', (req, res) => {
