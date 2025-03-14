@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useEffect } from "react";
 import { createContext, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -8,6 +9,21 @@ export const AppContextProvider = (props) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [isLoggedin, setIsLoggedin] = useState(false); // ✅ To‘g‘rilandi
     const [userData, setUserData] = useState(false);
+
+    const getAuthState = async () => {
+        try {
+            const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`, {
+                withCredentials: true, // Agar cookie bilan ishlasangiz
+            });
+    
+            if (data.success) {
+                setIsLoggedin(true);
+                getUserData();
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Xatolik yuz berdi");
+        }
+    };
 
     const getUserData =async()=>{
         try{
@@ -25,7 +41,9 @@ export const AppContextProvider = (props) => {
         userData, setUserData,getUserData
     };
 
-
+    useEffect(()=>{
+        getAuthState()
+    },[])
 
     return (
         <AppContent.Provider value={value}>
