@@ -83,21 +83,22 @@ export const login =async(req,res)=>{
 }
 
 //log out
-export const logout =async(req,res)=>{
-    try{
-        res.clearCookie('token', token, {  // 🔹 JWT tokenni cookie sifatida yuborish
-            httpOnly: true,  // 🔹 Cookie faqat HTTP orqali o‘qilishi mumkin (JavaScript orqali emas)
-            secure: process.env.NODE_ENV === "production",  // 🔹 Agar production bo‘lsa, cookie faqat HTTPS orqali yuboriladi
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie('token', {  // 🔹 Faqat cookie nomi berilishi kerak
+            httpOnly: true,  
+            secure: process.env.NODE_ENV === "production",  
             sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',  
-            // 🔹 Production bo‘lsa 'none', aks holda 'strict' (CSRF hujumlarga qarshi himoya)
-        })
+        });
 
-        res.json({ success: true, message: "Xisobdan Chiqtingiz" })  // 🔹 Foydalanuvchiga javob qaytarish kerak
+        res.json({ success: true, message: "Xisobdan chiqdingiz" });  // 🔹 Javob qaytarish
 
-    }catch(error){
-        res.status(500).json({ success: false, message: "Loginda xatolik" })   
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Logoutda xatolik" });   
     }
-}
+};
+
+
 
 
 export const sendVerifyOtp=async(req,res)=>{
