@@ -4,7 +4,7 @@ import dotenv from 'dotenv';  // 🔹 .env fayldan konfiguratsiyani yuklash
 import cookieParser from 'cookie-parser';  // 🔹 Cookie'larni o‘qish va boshqarish uchun middleware
 import connectDB from './config/db.js';  // 🔹 MongoDB bazasiga ulanish funksiyasini import qilish
 import authRoutes from './routes/authRoutes.js';  // 🔹 Autentifikatsiya yo‘llarini import qilish
-import userRouter from './routes/userRoutes.js';
+// import userRouter from './routes/userRoutes.js';
 
 // 🔹 .env fayldagi konfiguratsiyalarni yuklash
 dotenv.config();
@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 
 // 🔹 Autentifikatsiya marshrutlarini (yo‘llarini) qo‘shish
 app.use("/api/auth", authRoutes);
-app.use('/api/user',userRouter)
+// app.use('/api/user',userRouter)
 
 // 🔹 Serverni ishga tushirish va konsolga xabar chiqarish
 app.listen(port, () => {
