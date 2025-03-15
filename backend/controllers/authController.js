@@ -143,13 +143,13 @@ export const sendVerifyOtp=async(req,res)=>{
 }
 
 export const verifyEmail=async(req,res)=>{
-    const {useriId,otp}=req.body
+    const {userId,otp}=req.body
 
-    if(!useriId||!otp){
+    if(!userId||!otp){
         return res.json({success:false,message:'missing dateild'})
     }
     try{
-        const user =await userModel.findById(useriId)
+        const user =await userModel.findById(userId)
         
         if(!user){
             return res.json({success:false,message:'user not found'})
@@ -159,7 +159,7 @@ export const verifyEmail=async(req,res)=>{
             return res.json({success:false,message:'invalid otp'})
         }
 
-        if(user.verifyOtpExpireAt<Data.now()){
+        if(user.verifyOtpExpireAt<Date.now()){
             return res.json({success:false,message:'OTP expired'})
         }
 
