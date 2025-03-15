@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';  // 🔹 Foydalanuvchini autentifikatsiya qilish
 import userModel from '../model/userModel.js';  // 🔹 Mongoose orqali foydalanuvchi modeli chaqirilmoqda
 import transporter from '../config/nodemailer.js';
 
-// ========================== Foydalanuvchini ro‘yxatdan o‘tkazish ==========================
 
 export const register = async (req, res) => {  // 🔹 "register" funksiyasi e'lon qilinmoqda (async - asinxron)
     const { name, email, password } = req.body  // 🔹 Foydalanuvchidan kelgan ma'lumotlar olinmoqda
@@ -25,15 +24,22 @@ export const register = async (req, res) => {  // 🔹 "register" funksiyasi e'l
         await user.save()  // 🔹 Foydalanuvchini MongoDB'ga saqlash
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })  
-        // 🔹 Foydalanuvchi ID orqali JWT token yaratish, 7 kun amal qiladi
 
         res.cookie('token', token, {  // 🔹 JWT tokenni cookie sifatida yuborish
             httpOnly: true,  // 🔹 Cookie faqat HTTP orqali o‘qilishi mumkin (JavaScript orqali emas)
             secure: process.env.NODE_ENV === "production",  // 🔹 Agar production bo‘lsa, cookie faqat HTTPS orqali yuboriladi
             sameSite: process.env.NODE_ENV === "production" ? 'none' : 'strict',  
-            // 🔹 Production bo‘lsa 'none', aks holda 'strict' (CSRF hujumlarga qarshi himoya)
             maxAge: 7 * 24 * 60 * 60 * 1000  // 🔹 Cookie 7 kun davomida saqlanadi
         })
+
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: email,
+            subject: 'Welcome to GreatStack',
+            text: `Welcome to greatstack website. Your account has been created with email id: ${email}`
+        }
+        
+        await transporter.sendMail(mailOptions)
 
         res.json({ success: true, message: "Ro‘yxatdan o‘tish muvaffaqiyatli" })  // 🔹 Foydalanuvchiga javob qaytarish kerak
 
@@ -123,7 +129,7 @@ export const sendVerifyOtp=async(req,res)=>{
             from:process.env.SENDER_EMAIL,
             to:user.email,
             subject:"Hush kelibsiz oka",
-            text:`Hush kelibsiz bizning web sitemizga salom berdik akahon id:${opt}`
+            text:`Your OTP is ${opt} Verify account using this OTP`
         }
 
         await transporter.sendMail(mailOptions)
@@ -148,9 +154,15 @@ export const verifyEmail=async(req,res)=>{
         if(!user){
             return res.json({success:false,message:'user not found'})
         }
+        
         if(user.verifyOtp===""||user.verifyOtp!==otp){
             return res.json({success:false,message:'invalid otp'})
         }
+
+        if(user.verifyOtpExpireAt<Data.now()){
+            return res.json({success:false,message:'OTP expired'})
+        }
+
 
         user.isAccountVerified=true;
         user.verifyOtp='',
@@ -248,7 +260,7 @@ export const getUserData =async(req,res)=>{
     try {
         const { userId } = req.body;
 
-        const user = await userModel.findById(userId); // ⬅️ Typo tuzatildi (finById ❌ -> findById ✅)
+        const user = await userModel.findById(userId); 
 
         if (!user) {
             return res.json({ success: false, message: "User not found" });
